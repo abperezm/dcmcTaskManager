@@ -9,7 +9,13 @@ import java.io.Serializable;
  * A WorkGroupMembership.
  */
 @Entity
-@Table(name = "work_group_membership")
+@Table(
+    name = "work_group_membership",
+    uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "work_group_id" }),
+    indexes = {
+        @Index(name = "idx_user_workgroup", columnList = "user_id, work_group_id")
+    }
+)
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class WorkGroupMembership implements Serializable {
 
@@ -27,9 +33,11 @@ public class WorkGroupMembership implements Serializable {
     private WorkGroupRole role;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "work_group_id", nullable = false)
     private WorkGroup workGroup;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
