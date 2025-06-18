@@ -74,7 +74,16 @@ public class CacheConfiguration {
             createCache(cm, com.dcmc.apps.taskmanager.repository.UserRepository.USERS_BY_LOGIN_CACHE, jcacheConfiguration);
             createCache(cm, com.dcmc.apps.taskmanager.repository.UserRepository.USERS_BY_EMAIL_CACHE, jcacheConfiguration);
             createCache(cm, com.dcmc.apps.taskmanager.domain.Authority.class.getName(), jcacheConfiguration);
-            // jhipster-needle-redis-add-entry
+            createCache(cm, com.dcmc.apps.taskmanager.domain.WorkGroup.class.getName(), jcacheConfiguration);
+            createCache(cm, com.dcmc.apps.taskmanager.domain.Project.class.getName(), jcacheConfiguration);
+            createCache(cm, com.dcmc.apps.taskmanager.domain.Project.class.getName() + ".tasks", jcacheConfiguration);
+            createCache(cm, com.dcmc.apps.taskmanager.domain.Project.class.getName() + ".members", jcacheConfiguration);
+            createCache(cm, com.dcmc.apps.taskmanager.domain.Task.class.getName(), jcacheConfiguration);
+            createCache(cm, com.dcmc.apps.taskmanager.domain.Task.class.getName() + ".comments", jcacheConfiguration);
+            createCache(cm, com.dcmc.apps.taskmanager.domain.Task.class.getName() + ".assignedMembers", jcacheConfiguration);
+            createCache(cm, com.dcmc.apps.taskmanager.domain.Comment.class.getName(), jcacheConfiguration);
+            createCache(cm, com.dcmc.apps.taskmanager.domain.WorkGroupMembership.class.getName(), jcacheConfiguration);
+            // jhipster-needle-redis-add-entry - JHipster will add redis cache entries here
         };
     }
 

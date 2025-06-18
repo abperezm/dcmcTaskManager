@@ -1,0 +1,72 @@
+enum WorkGroupRole {
+  OWNER,
+  MODERADOR,
+  MIEMBRO
+}
+
+enum TaskPriority {
+  LOW,
+  NORMAL,
+  HIGH
+}
+
+enum TaskStatus {
+  NOT_STARTED,
+  WORKING_ON_IT,
+  DONE
+}
+
+entity WorkGroup {
+  name String required,
+  description String
+}
+
+entity Project {
+  title String required,
+  description String
+}
+
+entity Task {
+  title String required,
+  description String required,
+  priority TaskPriority required,
+  status TaskStatus required,
+  createTime Instant required,
+  updateTime Instant required
+}
+
+entity Comment {
+  content String required,
+  createdAt Instant required
+}
+
+entity WorkGroupMembership {
+  role WorkGroupRole required
+}
+
+relationship ManyToOne {
+  Project{workGroup(name)} to WorkGroup,
+  Task{workGroup(name)} to WorkGroup
+}
+
+relationship OneToMany {
+  Task{comments} to Comment{task(title)}
+}
+
+relationship OneToMany {
+  Project{tasks} to Task{project(title)}
+}
+
+relationship ManyToOne {
+  WorkGroupMembership{user(login)} to User with builtInEntity,
+  WorkGroupMembership{workGroup(name)} to WorkGroup
+}
+
+relationship ManyToMany {
+  Project{members(login)} to User{projects} with builtInEntity,
+  Task{assignedMembers(login)} to User{tasks} with builtInEntity
+}
+
+paginate WorkGroup, Project, Task, Comment with pagination
+dto WorkGroup, Project, Task, Comment, WorkGroupMembership with mapstruct
+service WorkGroup, Project, Task, Comment, WorkGroupMembership with serviceClass

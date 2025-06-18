@@ -1,0 +1,81 @@
+{
+  "annotations": {
+    "changelogDate": "20250617054214"
+  },
+  "applications": "*",
+  "clientRootFolder": "taskmanager",
+  "databaseType": "sql",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "title",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "priority",
+      "fieldType": "TaskPriority",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "LOW,NORMAL,HIGH"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "TaskStatus",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "NOT_STARTED,WORKING_ON_IT,DONE"
+    },
+    {
+      "fieldName": "createTime",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "updateTime",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "microserviceName": "taskmanager",
+  "name": "Task",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityName": "comment",
+      "otherEntityRelationshipName": "task",
+      "relationshipName": "comments",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityField": "name",
+      "otherEntityName": "workGroup",
+      "relationshipName": "workGroup",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityField": "login",
+      "otherEntityName": "user",
+      "otherEntityRelationshipName": "tasks",
+      "relationshipName": "assignedMembers",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-many",
+      "relationshipWithBuiltInEntity": true
+    },
+    {
+      "otherEntityField": "title",
+      "otherEntityName": "project",
+      "otherEntityRelationshipName": "tasks",
+      "relationshipName": "project",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}
