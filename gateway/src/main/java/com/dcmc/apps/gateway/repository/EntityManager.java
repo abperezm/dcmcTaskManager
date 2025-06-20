@@ -176,7 +176,7 @@ public class EntityManager {
     public Mono<Long> updateLinkTable(LinkTable table, Object entityId, Stream<?> referencedIds) {
         return deleteFromLinkTable(table, entityId).then(
             Flux.fromStream(referencedIds)
-                .flatMap((Object referenceId) -> {
+                .flatMap(referenceId -> {
                     StatementMapper.InsertSpec insert = r2dbcEntityTemplate
                         .getDataAccessStrategy()
                         .getStatementMapper()

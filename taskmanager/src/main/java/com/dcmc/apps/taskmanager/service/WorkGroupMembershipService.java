@@ -1,7 +1,9 @@
 package com.dcmc.apps.taskmanager.service;
 
 import com.dcmc.apps.taskmanager.domain.WorkGroupMembership;
+import com.dcmc.apps.taskmanager.domain.enumeration.WorkGroupRole;
 import com.dcmc.apps.taskmanager.repository.WorkGroupMembershipRepository;
+import com.dcmc.apps.taskmanager.security.SecurityUtils;
 import com.dcmc.apps.taskmanager.service.dto.WorkGroupMembershipDTO;
 import com.dcmc.apps.taskmanager.service.mapper.WorkGroupMembershipMapper;
 import java.util.LinkedList;
@@ -126,5 +128,5 @@ public class WorkGroupMembershipService {
     public void delete(Long id) {
         LOG.debug("Request to delete WorkGroupMembership : {}", id);
         workGroupMembershipRepository.deleteById(id);
-    }
+    }    
 }

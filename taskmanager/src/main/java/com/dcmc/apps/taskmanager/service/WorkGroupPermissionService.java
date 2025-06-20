@@ -7,6 +7,7 @@ import com.dcmc.apps.taskmanager.repository.WorkGroupMembershipRepository;
 import com.dcmc.apps.taskmanager.security.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.Optional;
 
@@ -51,7 +52,20 @@ public class WorkGroupPermissionService {
         if (loginOpt.isEmpty()) return Optional.empty();
 
         return userService.getUserWithAuthoritiesByLogin(loginOpt.get())
-            .flatMap(user -> membershipRepository.findByUserIdAndWorkGroupId(Long.valueOf(user.getId()), workGroupId))
+            .flatMap(user -> membershipRepository.findByUserIdAndWorkGroupId(user.getId(), workGroupId))
             .map(WorkGroupMembership::getRole);
     }
+
+    public void checkIsOwner(Long workGroupId) {
+        if (!isOwner(workGroupId)) {
+            throw new AccessDeniedException("Debes ser el OWNER del grupo de trabajo");
+        }
+    }
+
+    public void checkCanManageMembers(Long workGroupId) {
+        if (!canManageMembers(workGroupId)) {
+            throw new AccessDeniedException("Debes ser OWNER o MODERADOR del grupo de trabajo");
+        }
+    }
+
 }

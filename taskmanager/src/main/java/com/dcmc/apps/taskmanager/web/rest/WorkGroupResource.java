@@ -1,7 +1,9 @@
 package com.dcmc.apps.taskmanager.web.rest;
 
 import com.dcmc.apps.taskmanager.repository.WorkGroupRepository;
+import com.dcmc.apps.taskmanager.security.SecurityUtils;
 import com.dcmc.apps.taskmanager.service.WorkGroupService;
+import com.dcmc.apps.taskmanager.service.WorkGroupPermissionService;
 import com.dcmc.apps.taskmanager.service.dto.WorkGroupDTO;
 import com.dcmc.apps.taskmanager.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -39,21 +42,19 @@ public class WorkGroupResource {
     private String applicationName;
 
     private final WorkGroupService workGroupService;
-
     private final WorkGroupRepository workGroupRepository;
+    private final WorkGroupPermissionService workGroupPermissionService;
 
-    public WorkGroupResource(WorkGroupService workGroupService, WorkGroupRepository workGroupRepository) {
+    public WorkGroupResource(
+        WorkGroupService workGroupService,
+        WorkGroupRepository workGroupRepository,
+        WorkGroupPermissionService workGroupPermissionService
+    ) {
         this.workGroupService = workGroupService;
         this.workGroupRepository = workGroupRepository;
+        this.workGroupPermissionService = workGroupPermissionService;
     }
 
-    /**
-     * {@code POST  /work-groups} : Create a new workGroup.
-     *
-     * @param workGroupDTO the workGroupDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new workGroupDTO, or with status {@code 400 (Bad Request)} if the workGroup has already an ID.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
     @PostMapping("")
     public ResponseEntity<WorkGroupDTO> createWorkGroup(@Valid @RequestBody WorkGroupDTO workGroupDTO) throws URISyntaxException {
         LOG.debug("REST request to save WorkGroup : {}", workGroupDTO);
@@ -66,16 +67,6 @@ public class WorkGroupResource {
             .body(workGroupDTO);
     }
 
-    /**
-     * {@code PUT  /work-groups/:id} : Updates an existing workGroup.
-     *
-     * @param id the id of the workGroupDTO to save.
-     * @param workGroupDTO the workGroupDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated workGroupDTO,
-     * or with status {@code 400 (Bad Request)} if the workGroupDTO is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the workGroupDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
     @PutMapping("/{id}")
     public ResponseEntity<WorkGroupDTO> updateWorkGroup(
         @PathVariable(value = "id", required = false) final Long id,
@@ -93,23 +84,16 @@ public class WorkGroupResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
+        if (!workGroupPermissionService.isOwner(id)) {
+            throw new AccessDeniedException("Only owners can update the work group");
+        }
+
         workGroupDTO = workGroupService.update(workGroupDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, workGroupDTO.getId().toString()))
             .body(workGroupDTO);
     }
 
-    /**
-     * {@code PATCH  /work-groups/:id} : Partial updates given fields of an existing workGroup, field will ignore if it is null
-     *
-     * @param id the id of the workGroupDTO to save.
-     * @param workGroupDTO the workGroupDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated workGroupDTO,
-     * or with status {@code 400 (Bad Request)} if the workGroupDTO is not valid,
-     * or with status {@code 404 (Not Found)} if the workGroupDTO is not found,
-     * or with status {@code 500 (Internal Server Error)} if the workGroupDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public ResponseEntity<WorkGroupDTO> partialUpdateWorkGroup(
         @PathVariable(value = "id", required = false) final Long id,
@@ -127,20 +111,17 @@ public class WorkGroupResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<WorkGroupDTO> result = workGroupService.partialUpdate(workGroupDTO);
+        if (!workGroupPermissionService.isOwner(id)) {
+            throw new AccessDeniedException("Only owners can partially update the work group");
+        }
 
+        Optional<WorkGroupDTO> result = workGroupService.partialUpdate(workGroupDTO);
         return ResponseUtil.wrapOrNotFound(
             result,
             HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, workGroupDTO.getId().toString())
         );
     }
 
-    /**
-     * {@code GET  /work-groups} : get all the workGroups.
-     *
-     * @param pageable the pagination information.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of workGroups in body.
-     */
     @GetMapping("")
     public ResponseEntity<List<WorkGroupDTO>> getAllWorkGroups(@org.springdoc.core.annotations.ParameterObject Pageable pageable) {
         LOG.debug("REST request to get a page of WorkGroups");
@@ -149,12 +130,6 @@ public class WorkGroupResource {
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
-    /**
-     * {@code GET  /work-groups/:id} : get the "id" workGroup.
-     *
-     * @param id the id of the workGroupDTO to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the workGroupDTO, or with status {@code 404 (Not Found)}.
-     */
     @GetMapping("/{id}")
     public ResponseEntity<WorkGroupDTO> getWorkGroup(@PathVariable("id") Long id) {
         LOG.debug("REST request to get WorkGroup : {}", id);
@@ -162,18 +137,64 @@ public class WorkGroupResource {
         return ResponseUtil.wrapOrNotFound(workGroupDTO);
     }
 
-    /**
-     * {@code DELETE  /work-groups/:id} : delete the "id" workGroup.
-     *
-     * @param id the id of the workGroupDTO to delete.
-     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWorkGroup(@PathVariable("id") Long id) {
         LOG.debug("REST request to delete WorkGroup : {}", id);
+
+        if (!workGroupPermissionService.isOwner(id)) {
+            throw new AccessDeniedException("Only owners can delete the work group");
+        }
+
         workGroupService.delete(id);
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    @PutMapping("/{workGroupId}/transfer-ownership/{newOwnerUserId}")
+    public ResponseEntity<Void> transferOwnership(
+        @PathVariable Long workGroupId,
+        @PathVariable String newOwnerUserId
+    ) {
+        LOG.debug("REST request to transfer ownership of WorkGroup {} to user {}", workGroupId, newOwnerUserId);
+        workGroupService.transferOwnership(workGroupId, newOwnerUserId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{workGroupId}/promote-to-moderator/{userId}")
+    public ResponseEntity<Void> promoteToModerator(
+        @PathVariable Long workGroupId,
+        @PathVariable String userId
+    ) {
+        LOG.debug("REST request to promote user {} to MODERATOR in WorkGroup {}", userId, workGroupId);
+        workGroupService.promoteToModerator(workGroupId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{workGroupId}/demote-moderator/{userId}")
+    public ResponseEntity<Void> demoteModerator(
+        @PathVariable Long workGroupId,
+        @PathVariable String userId
+    ) {
+        LOG.debug("REST request to demote user {} to MEMBER in WorkGroup {}", userId, workGroupId);
+        workGroupService.demoteModerator(workGroupId, userId);
+        return ResponseEntity.noContent().build();
+    }    
+
+    @DeleteMapping("/{groupId}/members/{targetUserId}")
+    public ResponseEntity<Void> removeMember(
+        @PathVariable Long groupId,
+        @PathVariable String targetUserId
+    ) {
+        LOG.debug("REST request to remove member {} from group {}", targetUserId, groupId);
+        workGroupService.removeMember(groupId, targetUserId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/leave")
+    public ResponseEntity<Void> leaveGroup(@PathVariable("id") Long groupId) {
+        String currentUserId = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        workGroupService.leaveGroup(groupId, currentUserId);
+        return ResponseEntity.noContent().build();
     }
 }

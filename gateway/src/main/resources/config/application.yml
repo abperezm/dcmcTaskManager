@@ -245,3 +245,16 @@ jhipster:
 # ===================================================================
 
 # application:
+
+# ================================================
+# OpenAPI aggregation for Swagger UI
+# ================================================
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    urls:
+      - name: gateway
+        url: /v3/api-docs
+      - name: taskmanager
+        url: http://localhost:8081/v3/api-docs
