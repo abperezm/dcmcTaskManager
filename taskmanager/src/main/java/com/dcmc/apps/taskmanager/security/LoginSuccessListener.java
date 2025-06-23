@@ -33,6 +33,7 @@ public class LoginSuccessListener implements ApplicationListener<AuthenticationS
 		Object principal = event.getAuthentication().getPrincipal();
 
 		if (principal instanceof Jwt jwt) {
+			System.out.println("login correcto");
 			String login = jwt.getClaimAsString("preferred_username");
 			String email = jwt.getClaimAsString("email");
 			String firstName = jwt.getClaimAsString("given_name");
@@ -63,6 +64,7 @@ public class LoginSuccessListener implements ApplicationListener<AuthenticationS
 				return userRepository.save(newUser);
 			});
 		} else {
+			System.out.println("Login success but principal is not a Jwt");
 			System.out.println(principal.getClass());
 		}
 	}

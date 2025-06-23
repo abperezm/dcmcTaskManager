@@ -44,7 +44,7 @@ public class PublicUserResource {
     public ResponseEntity<List<UserDTO>> getAllPublicUsers(@org.springdoc.core.annotations.ParameterObject Pageable pageable) {
         LOG.debug("REST request to get all public User names");
         
-        System.out.println(SecurityUtils.getCurrentUserLogin().get());
+        System.out.println(SecurityUtils.getCurrentUserLogin().orElseThrow());
         System.out.println(SecurityUtils.isAuthenticated());
         System.out.println(SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN));
 
@@ -58,7 +58,7 @@ public class PublicUserResource {
     public ResponseEntity<List<UserDTO>> getAllPublicUsers2(@org.springdoc.core.annotations.ParameterObject Pageable pageable) {
         LOG.debug("REST request to get all public User names");
         
-        System.out.println(SecurityUtils.getCurrentUserLogin().get());
+        System.out.println(SecurityUtils.getCurrentUserLogin().orElseThrow());
         System.out.println(SecurityUtils.isAuthenticated());
         System.out.println(SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN));
 

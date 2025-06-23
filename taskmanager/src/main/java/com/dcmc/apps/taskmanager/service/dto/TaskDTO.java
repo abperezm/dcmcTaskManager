@@ -41,6 +41,17 @@ public class TaskDTO implements Serializable {
 
     private ProjectDTO project;
 
+    @NotNull
+    private Boolean archived;
+
+    public Boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
+    }
+
     public Long getId() {
         return id;
     }
@@ -153,6 +164,7 @@ public class TaskDTO implements Serializable {
             ", status='" + getStatus() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
+            ", archived='" + isArchived() + "'" +
             ", workGroup=" + getWorkGroup() +
             ", assignedMembers=" + getAssignedMembers() +
             ", project=" + getProject() +

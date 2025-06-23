@@ -233,6 +233,7 @@ jhipster:
         - account
         - api://default
 
+
 # jhipster-needle-add-application-yaml-document
 ---
 # ===================================================================
@@ -245,6 +246,9 @@ jhipster:
 # ===================================================================
 
 # application:
+application:
+  microservices:
+    taskmanager-url: http://localhost:8081
 
 # ================================================
 # OpenAPI aggregation for Swagger UI

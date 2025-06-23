@@ -10,6 +10,25 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "application", ignoreUnknownFields = false)
 public class ApplicationProperties {
+
+    private final Microservices microservices = new Microservices();
+
+    public Microservices getMicroservices() {
+        return microservices;
+    }
+
+    public static class Microservices {
+        private String taskmanagerUrl;
+
+        public String getTaskmanagerUrl() {
+            return taskmanagerUrl;
+        }
+
+        public void setTaskmanagerUrl(String taskmanagerUrl) {
+            this.taskmanagerUrl = taskmanagerUrl;
+        }
+    }
+
     // jhipster-needle-application-properties-property
 
     // jhipster-needle-application-properties-property-getter

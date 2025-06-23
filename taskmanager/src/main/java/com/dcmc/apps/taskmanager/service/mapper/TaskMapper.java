@@ -15,12 +15,13 @@ import org.mapstruct.*;
 /**
  * Mapper for the entity {@link Task} and its DTO {@link TaskDTO}.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TaskMapper extends EntityMapper<TaskDTO, Task> {
+
     @Mapping(target = "workGroup", source = "workGroup", qualifiedByName = "workGroupName")
     @Mapping(target = "assignedMembers", source = "assignedMembers", qualifiedByName = "userLoginSet")
     @Mapping(target = "project", source = "project", qualifiedByName = "projectTitle")
-    TaskDTO toDto(Task s);
+    TaskDTO toDto(Task task);
 
     @Mapping(target = "removeAssignedMembers", ignore = true)
     Task toEntity(TaskDTO taskDTO);
@@ -38,8 +39,8 @@ public interface TaskMapper extends EntityMapper<TaskDTO, Task> {
     UserDTO toDtoUserLogin(User user);
 
     @Named("userLoginSet")
-    default Set<UserDTO> toDtoUserLoginSet(Set<User> user) {
-        return user.stream().map(this::toDtoUserLogin).collect(Collectors.toSet());
+    default Set<UserDTO> toDtoUserLoginSet(Set<User> users) {
+        return users.stream().map(this::toDtoUserLogin).collect(Collectors.toSet());
     }
 
     @Named("projectTitle")

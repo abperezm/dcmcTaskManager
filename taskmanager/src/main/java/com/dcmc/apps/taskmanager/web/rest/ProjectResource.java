@@ -3,6 +3,8 @@ package com.dcmc.apps.taskmanager.web.rest;
 import com.dcmc.apps.taskmanager.repository.ProjectRepository;
 import com.dcmc.apps.taskmanager.service.ProjectService;
 import com.dcmc.apps.taskmanager.service.dto.ProjectDTO;
+import com.dcmc.apps.taskmanager.service.dto.TaskDTO;
+import com.dcmc.apps.taskmanager.service.dto.UserDTO;
 import com.dcmc.apps.taskmanager.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +13,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -184,5 +188,42 @@ public class ProjectResource {
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    @PutMapping("/{id}/members")
+    public ResponseEntity<ProjectDTO> updateProjectMembers(
+        @PathVariable("id") Long id,
+        @RequestBody Set<UserDTO> memberDTOs
+    ) {
+        LOG.debug("REST request to update members of Project : {}", id);
+        ProjectDTO result = projectService.updateProjectMembers(id, memberDTOs);
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/{id}/tasks")
+    public ResponseEntity<ProjectDTO> assignTasksToProject(
+        @PathVariable("id") Long id,
+        @RequestBody List<Long> taskIds
+    ) {
+        LOG.debug("REST request to assign tasks to Project : {}", id);
+        ProjectDTO result = projectService.assignTasksToProject(id, taskIds);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{id}/tasks")
+    public ResponseEntity<List<TaskDTO>> getTasksForProject(@PathVariable("id") Long id) {
+        LOG.debug("REST request to get tasks for Project : {}", id);
+        List<TaskDTO> tasks = projectService.getTasksForProject(id);
+        return ResponseEntity.ok(tasks);
+    }
+
+    @DeleteMapping("/{projectId}/tasks/{taskId}")
+    public ResponseEntity<Void> removeTaskFromProject(
+        @PathVariable Long projectId,
+        @PathVariable Long taskId
+    ) {
+        LOG.debug("REST request to remove Task {} from Project {}", taskId, projectId);
+        projectService.removeTaskFromProject(projectId, taskId);
+        return ResponseEntity.noContent().build();
     }
 }

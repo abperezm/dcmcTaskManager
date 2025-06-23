@@ -71,7 +71,24 @@ public class Task implements Serializable {
     @JsonIgnoreProperties(value = { "tasks", "workGroup", "members" }, allowSetters = true)
     private Project project;
 
+    @NotNull
+    @Column(name = "archived", nullable = false)
+    private Boolean archived = false;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
+    public Boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
+    }
+
+    public Task archived(Boolean archived) {
+        this.archived = archived;
+        return this;
+    }
 
     public Long getId() {
         return this.id;

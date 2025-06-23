@@ -17,6 +17,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TaskRepository extends TaskRepositoryWithBagRelationships, JpaRepository<Task, Long> {
+
+    // Eager loading methods
     default Optional<Task> findOneWithEagerRelationships(Long id) {
         return this.fetchBagRelationships(this.findOneWithToOneRelationships(id));
     }
@@ -40,4 +42,17 @@ public interface TaskRepository extends TaskRepositoryWithBagRelationships, JpaR
 
     @Query("select task from Task task left join fetch task.workGroup left join fetch task.project where task.id =:id")
     Optional<Task> findOneWithToOneRelationships(@Param("id") Long id);
+
+    // Archivado
+    Page<Task> findAllByArchivedTrue(Pageable pageable);
+
+    Page<Task> findAllByArchivedFalse(Pageable pageable);
+
+    List<Task> findAllByArchivedTrue();
+
+    List<Task> findAllByArchivedFalse();
+
+    Page<Task> findByArchivedTrue(Pageable pageable);
+
+    Page<Task> findByArchivedFalse(Pageable pageable);
 }

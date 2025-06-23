@@ -51,7 +51,7 @@ public class WorkGroupPermissionService {
         Optional<String> loginOpt = SecurityUtils.getCurrentUserLogin();
         if (loginOpt.isEmpty()) return Optional.empty();
 
-        return userService.getUserWithAuthoritiesByLogin(loginOpt.get())
+        return userService.getUserWithAuthoritiesByLogin(loginOpt.orElseThrow())
             .flatMap(user -> membershipRepository.findByUserIdAndWorkGroupId(user.getId(), workGroupId))
             .map(WorkGroupMembership::getRole);
     }

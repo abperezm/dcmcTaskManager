@@ -185,4 +185,35 @@ public class TaskResource {
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
             .build();
     }
+
+    /**
+     * {@code POST  /tasks/:id/archive} : Archive a task if it's DONE and user has permission.
+     */
+    @PostMapping("/tasks/{id}/archive")
+    public ResponseEntity<TaskDTO> archiveTask(@PathVariable Long id) {
+        LOG.debug("REST request to archive Task : {}", id);
+        TaskDTO result = taskService.archiveTask(id);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * {@code GET  /tasks/archived} : Get all archived tasks.
+     */
+    @GetMapping("/tasks/archived")
+    public ResponseEntity<List<TaskDTO>> getArchivedTasks(Pageable pageable) {
+        LOG.debug("REST request to get archived tasks");
+        Page<TaskDTO> page = taskService.findArchivedTasks(pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    /**
+     * {@code DELETE  /tasks/archived/:id} : Delete an archived task (OWNER or MODERADOR only).
+     */
+    @DeleteMapping("/tasks/archived/{id}")
+    public ResponseEntity<Void> deleteArchivedTask(@PathVariable Long id) {
+        LOG.debug("REST request to delete archived Task : {}", id);
+        taskService.deleteArchivedTask(id);
+        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString())).build();
+    }
 }
