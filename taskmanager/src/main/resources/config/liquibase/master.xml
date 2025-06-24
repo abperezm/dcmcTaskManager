@@ -23,6 +23,8 @@
     <include file="config/liquibase/changelog/20250617054215_added_entity_constraints_Comment.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20250617054216_added_entity_constraints_WorkGroupMembership.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20250619_added_archived_column_to_task.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250624212538_added_entity_TaskPriority.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250624212539_added_entity_TaskStatus.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
 </databaseChangeLog>

@@ -1,7 +1,5 @@
 package com.dcmc.apps.taskmanager.service.dto;
 
-import com.dcmc.apps.taskmanager.domain.enumeration.TaskPriority;
-import com.dcmc.apps.taskmanager.domain.enumeration.TaskStatus;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.time.Instant;
@@ -24,16 +22,13 @@ public class TaskDTO implements Serializable {
     private String description;
 
     @NotNull
-    private TaskPriority priority;
-
-    @NotNull
-    private TaskStatus status;
-
-    @NotNull
     private Instant createTime;
 
     @NotNull
     private Instant updateTime;
+
+    @NotNull
+    private Boolean archived;
 
     private WorkGroupDTO workGroup;
 
@@ -41,8 +36,9 @@ public class TaskDTO implements Serializable {
 
     private ProjectDTO project;
 
-    @NotNull
-    private Boolean archived;
+    private TaskPriorityDTO priority;
+
+    private TaskStatusDTO status;
 
     public Boolean isArchived() {
         return archived;
@@ -74,22 +70,6 @@ public class TaskDTO implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public TaskPriority getPriority() {
-        return priority;
-    }
-
-    public void setPriority(TaskPriority priority) {
-        this.priority = priority;
-    }
-
-    public TaskStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TaskStatus status) {
-        this.status = status;
     }
 
     public Instant getCreateTime() {
@@ -132,6 +112,22 @@ public class TaskDTO implements Serializable {
         this.project = project;
     }
 
+    public TaskPriorityDTO getPriority() {
+        return priority;
+    }
+
+    public void setPriority(TaskPriorityDTO priority) {
+        this.priority = priority;
+    }
+
+    public TaskStatusDTO getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskStatusDTO status) {
+        this.status = status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -160,14 +156,14 @@ public class TaskDTO implements Serializable {
             "id=" + getId() +
             ", title='" + getTitle() + "'" +
             ", description='" + getDescription() + "'" +
-            ", priority='" + getPriority() + "'" +
-            ", status='" + getStatus() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
             ", archived='" + isArchived() + "'" +
             ", workGroup=" + getWorkGroup() +
             ", assignedMembers=" + getAssignedMembers() +
             ", project=" + getProject() +
+            ", priority=" + getPriority() +
+            ", status=" + getStatus() +
             "}";
     }
 }

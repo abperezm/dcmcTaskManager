@@ -1,0 +1,14 @@
+entity TaskPriority {
+  name String required,
+  level Integer,
+  visible Boolean required
+}
+
+entity TaskStatus {
+  name String required,
+  visible Boolean required
+}
+
+paginate TaskPriority, TaskStatus with pagination
+service TaskPriority, TaskStatus with serviceClass
+dto TaskPriority, TaskStatus with mapstruct

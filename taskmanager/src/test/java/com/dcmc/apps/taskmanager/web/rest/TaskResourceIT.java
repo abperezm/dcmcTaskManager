@@ -11,8 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.dcmc.apps.taskmanager.IntegrationTest;
 import com.dcmc.apps.taskmanager.domain.Task;
-import com.dcmc.apps.taskmanager.domain.enumeration.TaskPriority;
-import com.dcmc.apps.taskmanager.domain.enumeration.TaskStatus;
+import com.dcmc.apps.taskmanager.domain.TaskPriority;
+import com.dcmc.apps.taskmanager.domain.TaskStatus;
 import com.dcmc.apps.taskmanager.repository.TaskRepository;
 import com.dcmc.apps.taskmanager.repository.UserRepository;
 import com.dcmc.apps.taskmanager.service.TaskService;
@@ -55,11 +55,21 @@ class TaskResourceIT {
     private static final String DEFAULT_DESCRIPTION = "AAAAAAAAAA";
     private static final String UPDATED_DESCRIPTION = "BBBBBBBBBB";
 
-    private static final TaskPriority DEFAULT_PRIORITY = TaskPriority.LOW;
-    private static final TaskPriority UPDATED_PRIORITY = TaskPriority.NORMAL;
+    private static final TaskPriority DEFAULT_PRIORITY = new TaskPriority()
+        .name("LOW")
+        .level(1)
+        .visible(true);
+    private static final TaskPriority UPDATED_PRIORITY = new TaskPriority()
+        .name("HIGH")
+        .level(3)
+        .visible(true);
 
-    private static final TaskStatus DEFAULT_STATUS = TaskStatus.NOT_STARTED;
-    private static final TaskStatus UPDATED_STATUS = TaskStatus.WORKING_ON_IT;
+    private static final TaskStatus DEFAULT_STATUS = new TaskStatus()
+        .name("NOT_STARTED")
+        .visible(true);
+    private static final TaskStatus UPDATED_STATUS = new TaskStatus()
+        .name("COMPLETED")
+        .visible(true);
 
     private static final Instant DEFAULT_CREATE_TIME = Instant.ofEpochMilli(0L);
     private static final Instant UPDATED_CREATE_TIME = Instant.now().truncatedTo(ChronoUnit.MILLIS);

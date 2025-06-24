@@ -1,7 +1,5 @@
 package com.dcmc.apps.taskmanager.domain;
 
-import com.dcmc.apps.taskmanager.domain.enumeration.TaskPriority;
-import com.dcmc.apps.taskmanager.domain.enumeration.TaskStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -35,16 +33,6 @@ public class Task implements Serializable {
     private String description;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "priority", nullable = false)
-    private TaskPriority priority;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private TaskStatus status;
-
-    @NotNull
     @Column(name = "create_time", nullable = false)
     private Instant createTime;
 
@@ -71,11 +59,17 @@ public class Task implements Serializable {
     @JsonIgnoreProperties(value = { "tasks", "workGroup", "members" }, allowSetters = true)
     private Project project;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private TaskPriority priority;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private TaskStatus status;
+
     @NotNull
     @Column(name = "archived", nullable = false)
     private Boolean archived = false;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
+    // Getters y setters
 
     public Boolean isArchived() {
         return archived;
@@ -127,32 +121,6 @@ public class Task implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public TaskPriority getPriority() {
-        return this.priority;
-    }
-
-    public Task priority(TaskPriority priority) {
-        this.setPriority(priority);
-        return this;
-    }
-
-    public void setPriority(TaskPriority priority) {
-        this.priority = priority;
-    }
-
-    public TaskStatus getStatus() {
-        return this.status;
-    }
-
-    public Task status(TaskStatus status) {
-        this.setStatus(status);
-        return this;
-    }
-
-    public void setStatus(TaskStatus status) {
-        this.status = status;
     }
 
     public Instant getCreateTime() {
@@ -261,36 +229,57 @@ public class Task implements Serializable {
         return this;
     }
 
+    public TaskPriority getPriority() {
+        return this.priority;
+    }
+
+    public void setPriority(TaskPriority priority) {
+        this.priority = priority;
+    }
+
+    public Task priority(TaskPriority updatedPriority) {
+        this.setPriority(updatedPriority);
+        return this;
+    }
+
+    public TaskStatus getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
+    }
+
+    public Task status(TaskStatus status) {
+        this.setStatus(status);
+        return this;
+    }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Task)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (!(o instanceof Task)) return false;
         return getId() != null && getId().equals(((Task) o).getId());
     }
 
     @Override
     public int hashCode() {
-        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
         return getClass().hashCode();
     }
 
-    // prettier-ignore
     @Override
     public String toString() {
         return "Task{" +
             "id=" + getId() +
-            ", title='" + getTitle() + "'" +
-            ", description='" + getDescription() + "'" +
-            ", priority='" + getPriority() + "'" +
-            ", status='" + getStatus() + "'" +
-            ", createTime='" + getCreateTime() + "'" +
-            ", updateTime='" + getUpdateTime() + "'" +
-            "}";
+            ", title='" + getTitle() + '\'' +
+            ", description='" + getDescription() + '\'' +
+            ", priority=" + (priority != null ? priority.getName() : null) +
+            ", status=" + (status != null ? status.getName() : null) +
+            ", createTime=" + getCreateTime() +
+            ", updateTime=" + getUpdateTime() +
+            ", archived=" + isArchived() +
+            '}';
     }
 }

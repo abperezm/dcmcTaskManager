@@ -101,7 +101,7 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
             .orElseThrow(() -> new EntityNotFoundException("Task not found"));
 
-        if (!task.getStatus().name().equals("DONE")) {
+        if (!task.getStatus().getName().equals("DONE")) {
             throw new IllegalStateException("Only DONE tasks can be archived");
         }
 

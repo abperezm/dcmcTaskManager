@@ -83,6 +83,8 @@ public class CacheConfiguration {
             createCache(cm, com.dcmc.apps.taskmanager.domain.Task.class.getName() + ".assignedMembers", jcacheConfiguration);
             createCache(cm, com.dcmc.apps.taskmanager.domain.Comment.class.getName(), jcacheConfiguration);
             createCache(cm, com.dcmc.apps.taskmanager.domain.WorkGroupMembership.class.getName(), jcacheConfiguration);
+            createCache(cm, com.dcmc.apps.taskmanager.domain.TaskPriority.class.getName(), jcacheConfiguration);
+            createCache(cm, com.dcmc.apps.taskmanager.domain.TaskStatus.class.getName(), jcacheConfiguration);
             // jhipster-needle-redis-add-entry - JHipster will add redis cache entries here
         };
     }
