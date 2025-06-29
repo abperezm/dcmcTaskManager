@@ -16,8 +16,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 import java.util.Set;
@@ -40,48 +40,51 @@ public class JwtUserSyncFilter extends GenericFilterBean {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
         throws IOException, ServletException {
 
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String path = httpRequest.getRequestURI();
-
-        // Excluir la ruta de sincronización explícita
+        HttpServletRequest httpReq = (HttpServletRequest) request;
+        String path = httpReq.getRequestURI();
+        // No re-sincronices si ya lo haces vía /internal/sync-user
         if (path.startsWith("/internal/sync-user")) {
             chain.doFilter(request, response);
             return;
         }
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication instanceof JwtAuthenticationToken token) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth instanceof JwtAuthenticationToken token) {
             Jwt jwt = token.getToken();
             String login = jwt.getClaimAsString("preferred_username");
+            if (login != null) {
+                log.debug("JwtUserSyncFilter procesando login: {}", login);
+                // Si no existe un usuario con este login, crea uno nuevo...
+                if (userRepository.findOneByLogin(login).isEmpty()) {
+                    User newUser = new User();
+                    // <— aquí asignamos el id (PK) igual al login
+                    newUser.setId(login);
+                    newUser.setLogin(login);
+                    newUser.setEmail(jwt.getClaimAsString("email"));
+                    newUser.setFirstName(jwt.getClaimAsString("given_name"));
+                    newUser.setLastName(jwt.getClaimAsString("family_name"));
+                    newUser.setActivated(true);
+                    newUser.setLangKey("en");
 
-            log.info(">> JwtUserSyncFilter ejecutándose para login: {}", login);
+                    // extrae roles desde el claim “roles”
+                    Set<String> roles = SecurityUtils.extractAuthorityFromClaims(jwt.getClaims())
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toSet());
 
-            if (login != null && userRepository.findOneByLogin(login).isEmpty()) {
-                User newUser = new User();
-                newUser.setLogin(login);
-                newUser.setEmail(jwt.getClaimAsString("email"));
-                newUser.setFirstName(jwt.getClaimAsString("given_name"));
-                newUser.setLastName(jwt.getClaimAsString("family_name"));
-                newUser.setActivated(true);
-                newUser.setLangKey("en");
+                    // crea/recupera cada Authority y asígnalas al usuario
+                    Set<Authority> authorities = roles.stream()
+                        .map(role -> authorityRepository.findById(role).orElseGet(() -> {
+                            Authority a = new Authority();
+                            a.setName(role);
+                            return authorityRepository.save(a);
+                        }))
+                        .collect(Collectors.toSet());
+                    newUser.setAuthorities(authorities);
 
-                Set<String> roles = SecurityUtils.extractAuthorityFromClaims(jwt.getClaims()).stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toSet());
-
-                Set<Authority> authorities = roles.stream()
-                    .map(role -> authorityRepository.findById(role).orElseGet(() -> {
-                        Authority newAuthority = new Authority();
-                        newAuthority.setName(role);
-                        return authorityRepository.save(newAuthority);
-                    }))
-                    .collect(Collectors.toSet());
-
-                newUser.setAuthorities(authorities);
-
-                userRepository.save(newUser);
-                log.info("✅ Usuario sincronizado desde JWT: {}", login);
+                    userRepository.save(newUser);
+                    log.info("✅ Usuario sincronizado desde JWT: {}", login);
+                }
             }
         }
 

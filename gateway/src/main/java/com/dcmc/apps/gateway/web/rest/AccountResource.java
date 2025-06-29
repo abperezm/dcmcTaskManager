@@ -4,6 +4,7 @@ import com.dcmc.apps.gateway.client.UserSyncClient;
 import com.dcmc.apps.gateway.security.SecurityUtils;
 import com.dcmc.apps.gateway.service.dto.UserDTO;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import java.net.URI;
 import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,74 +34,82 @@ public class AccountResource {
 
     private static class AccountResourceException extends RuntimeException {
         private static final long serialVersionUID = 1L;
-
-        private AccountResourceException(String message) {
+        public AccountResourceException(String message) {
             super(message);
         }
     }
 
+    /**
+     * GET  /account : retorna el usuario actual y lo sincroniza en el microservicio.
+     */
     @GetMapping("/account")
     public Mono<UserVM> getAccount(Principal principal) {
-        if (principal instanceof JwtAuthenticationToken jwtToken) {
-            Map<String, Object> attributes = jwtToken.getTokenAttributes();
-            UserDTO userDTO = buildUserDTO(jwtToken.getName(), attributes);
-            String rawToken = jwtToken.getToken().getTokenValue();
-
-            return userSyncClient.syncUser(userDTO, rawToken)
-                .thenReturn(new UserVM(
-                    jwtToken.getName(),
-                    jwtToken.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()),
-                    SecurityUtils.extractDetailsFromTokenAttributes(attributes)
-                ));
-        } else if (principal instanceof AbstractAuthenticationToken token) {
-            Map<String, Object> attributes = extractAttributes(token);
-            UserDTO userDTO = buildUserDTO(token.getName(), attributes);
-
-            return Mono.just(new UserVM(
-                token.getName(),
-                token.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()),
-                SecurityUtils.extractDetailsFromTokenAttributes(attributes)
-            ));
-        } else {
+        if (!(principal instanceof AbstractAuthenticationToken token)) {
             throw new AccountResourceException("User could not be found");
+        }
+
+        UserDTO userDTO = buildUserDTO(token.getName(), extractAttributes(token));
+
+        if (token instanceof JwtAuthenticationToken jwtToken) {
+            // API client con JWT: enviamos el token al microservicio
+            String bearer = jwtToken.getToken().getTokenValue();
+            return userSyncClient
+                .syncUser(userDTO, bearer)
+                .thenReturn(toVM(jwtToken.getName(), jwtToken.getAuthorities(), extractAttributes(jwtToken)));
+
+        } else if (token instanceof OAuth2AuthenticationToken oauth2) {
+            // Login UI: no hay que pasar token (se asume sesión)
+            return userSyncClient
+                .syncUser(userDTO)
+                .thenReturn(toVM(oauth2.getName(), oauth2.getAuthorities(), extractAttributes(oauth2)));
+
+        } else {
+            throw new AccountResourceException("Unsupported authentication token");
         }
     }
 
     @GetMapping("/authenticate")
     public ResponseEntity<Void> isAuthenticated(Principal principal) {
         LOG.debug("REST request to check if the current user is authenticated");
-        return ResponseEntity.status(principal == null ? HttpStatus.UNAUTHORIZED : HttpStatus.NO_CONTENT).build();
+        return ResponseEntity
+            .status(principal == null ? HttpStatus.UNAUTHORIZED : HttpStatus.NO_CONTENT)
+            .build();
     }
 
-    private Map<String, Object> extractAttributes(AbstractAuthenticationToken authToken) {
-        if (authToken instanceof JwtAuthenticationToken jwt) {
+    private Map<String, Object> extractAttributes(AbstractAuthenticationToken auth) {
+        if (auth instanceof JwtAuthenticationToken jwt) {
             return jwt.getTokenAttributes();
-        } else if (authToken instanceof OAuth2AuthenticationToken oauth2) {
+        } else if (auth instanceof OAuth2AuthenticationToken oauth2) {
             return oauth2.getPrincipal().getAttributes();
-        } else {
-            throw new IllegalArgumentException("AuthenticationToken is not OAuth2 or JWT!");
         }
+        return Collections.emptyMap();
     }
 
-    private UserDTO buildUserDTO(String login, Map<String, Object> attributes) {
+    private UserDTO buildUserDTO(String login, Map<String, Object> attrs) {
         UserDTO dto = new UserDTO();
         dto.setLogin(login);
-        dto.setEmail((String) attributes.get("email"));
-        dto.setFirstName((String) attributes.get("given_name"));
-        dto.setLastName((String) attributes.get("family_name"));
+        dto.setEmail((String) attrs.get("email"));
+        dto.setFirstName((String) attrs.get("given_name"));
+        dto.setLastName((String) attrs.get("family_name"));
         dto.setActivated(true);
         dto.setLangKey("en");
 
-        Object rolesAttr = attributes.get("roles");
+        Object rolesRaw = attrs.get("roles");
         Set<String> roles = new HashSet<>();
-        if (rolesAttr instanceof Collection<?> list) {
-            roles = list.stream()
-                .map(Object::toString)
-                .collect(Collectors.toSet());
+        if (rolesRaw instanceof Collection<?> col) {
+            col.forEach(r -> roles.add(r.toString()));
         }
-
         dto.setRoles(roles);
+
         return dto;
+    }
+
+    private UserVM toVM(String login, Collection<? extends GrantedAuthority> auths, Map<String, Object> details) {
+        return new UserVM(
+            login,
+            auths.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()),
+            SecurityUtils.extractDetailsFromTokenAttributes(details)
+        );
     }
 
     private static class UserVM {
@@ -114,21 +123,12 @@ public class AccountResource {
             this.details = details;
         }
 
-        public boolean isActivated() {
-            return true;
-        }
-
-        public Set<String> getAuthorities() {
-            return authorities;
-        }
-
-        public String getLogin() {
-            return login;
-        }
+        public String getLogin() { return login; }
+        public Set<String> getAuthorities() { return authorities; }
 
         @JsonAnyGetter
-        public Map<String, Object> getDetails() {
-            return details;
-        }
+        public Map<String, Object> getDetails() { return details; }
+
+        public boolean isActivated() { return true; }
     }
 }
