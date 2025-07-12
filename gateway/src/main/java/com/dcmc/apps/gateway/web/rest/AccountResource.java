@@ -87,6 +87,7 @@ public class AccountResource {
 
     private UserDTO buildUserDTO(String login, Map<String, Object> attrs) {
         UserDTO dto = new UserDTO();
+        dto.setId(login);
         dto.setLogin(login);
         dto.setEmail((String) attrs.get("email"));
         dto.setFirstName((String) attrs.get("given_name"));

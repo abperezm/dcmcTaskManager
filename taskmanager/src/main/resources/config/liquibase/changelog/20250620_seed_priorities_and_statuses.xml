@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+       http://www.liquibase.org/xml/ns/dbchangelog
+       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20250704-06-seed-task-priorities-and-statuses" author="you">
+        <preConditions onFail="MARK_RAN">
+            <!-- Comprueba que las tablas existan -->
+            <tableExists tableName="task_priority"/>
+            <tableExists tableName="task_status"/>
+        </preConditions>
+
+        <!-- ==== Priority Seed ==== -->
+        <preConditions onFail="CONTINUE">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM task_priority WHERE name='LOW'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <insert tableName="task_priority">
+            <column name="name" value="LOW"/>
+            <column name="level" valueNumeric="1"/>
+            <column name="visible" valueBoolean="true"/>
+        </insert>
+
+        <preConditions onFail="CONTINUE">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM task_priority WHERE name='NORMAL'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <insert tableName="task_priority">
+            <column name="name" value="NORMAL"/>
+            <column name="level" valueNumeric="2"/>
+            <column name="visible" valueBoolean="true"/>
+        </insert>
+
+        <preConditions onFail="CONTINUE">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM task_priority WHERE name='HIGH'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <insert tableName="task_priority">
+            <column name="name" value="HIGH"/>
+            <column name="level" valueNumeric="3"/>
+            <column name="visible" valueBoolean="true"/>
+        </insert>
+
+        <!-- ==== Status Seed ==== -->
+        <preConditions onFail="CONTINUE">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM task_status WHERE name='NOT_STARTED'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <insert tableName="task_status">
+            <column name="name" value="NOT_STARTED"/>
+            <column name="visible" valueBoolean="true"/>
+        </insert>
+
+        <preConditions onFail="CONTINUE">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM task_status WHERE name='WORKING_ON_IT'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <insert tableName="task_status">
+            <column name="name" value="WORKING_ON_IT"/>
+            <column name="visible" valueBoolean="true"/>
+        </insert>
+
+        <preConditions onFail="CONTINUE">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM task_status WHERE name='DONE'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <insert tableName="task_status">
+            <column name="name" value="DONE"/>
+            <column name="visible" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

@@ -28,6 +28,7 @@ public class UserSyncService {
 
         userRepository.findOneByLogin(dto.getLogin()).orElseGet(() -> {
             User newUser = new User();
+            newUser.setId(dto.getLogin()); // Set the ID to match the login
             newUser.setLogin(dto.getLogin());
             newUser.setEmail(dto.getEmail());
             newUser.setFirstName(dto.getFirstName());

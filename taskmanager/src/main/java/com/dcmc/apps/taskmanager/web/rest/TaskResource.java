@@ -189,7 +189,7 @@ public class TaskResource {
     /**
      * {@code POST  /tasks/:id/archive} : Archive a task if it's DONE and user has permission.
      */
-    @PostMapping("/tasks/{id}/archive")
+    @PostMapping("/{id}/archive")
     public ResponseEntity<TaskDTO> archiveTask(@PathVariable Long id) {
         LOG.debug("REST request to archive Task : {}", id);
         TaskDTO result = taskService.archiveTask(id);
@@ -199,7 +199,7 @@ public class TaskResource {
     /**
      * {@code GET  /tasks/archived} : Get all archived tasks.
      */
-    @GetMapping("/tasks/archived")
+    @GetMapping("/archived")
     public ResponseEntity<List<TaskDTO>> getArchivedTasks(Pageable pageable) {
         LOG.debug("REST request to get archived tasks");
         Page<TaskDTO> page = taskService.findArchivedTasks(pageable);
@@ -210,7 +210,7 @@ public class TaskResource {
     /**
      * {@code DELETE  /tasks/archived/:id} : Delete an archived task (OWNER or MODERADOR only).
      */
-    @DeleteMapping("/tasks/archived/{id}")
+    @DeleteMapping("/archived/{id}")
     public ResponseEntity<Void> deleteArchivedTask(@PathVariable Long id) {
         LOG.debug("REST request to delete archived Task : {}", id);
         taskService.deleteArchivedTask(id);

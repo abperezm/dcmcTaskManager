@@ -4,6 +4,7 @@ import com.dcmc.apps.taskmanager.repository.ProjectRepository;
 import com.dcmc.apps.taskmanager.service.ProjectService;
 import com.dcmc.apps.taskmanager.service.dto.ProjectDTO;
 import com.dcmc.apps.taskmanager.service.dto.TaskDTO;
+import com.dcmc.apps.taskmanager.service.dto.TaskSummaryDTO;
 import com.dcmc.apps.taskmanager.service.dto.UserDTO;
 import com.dcmc.apps.taskmanager.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
@@ -225,5 +226,11 @@ public class ProjectResource {
         LOG.debug("REST request to remove Task {} from Project {}", taskId, projectId);
         projectService.removeTaskFromProject(projectId, taskId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/tasks/summary")
+    public ResponseEntity<List<TaskSummaryDTO>> getTaskSummaries(@PathVariable Long id) {
+        List<TaskSummaryDTO> summaries = projectService.getTaskSummariesForProject(id);
+        return ResponseEntity.ok(summaries);
     }
 }

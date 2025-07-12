@@ -125,6 +125,7 @@
     "eslint-config-prettier": "10.1.2",
     "eslint-plugin-prettier": "5.4.0",
     "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-webpack-plugin": "5.0.1",
     "fork-ts-checker-webpack-plugin": "9.1.0",
     "generator-jhipster": "8.11.0",

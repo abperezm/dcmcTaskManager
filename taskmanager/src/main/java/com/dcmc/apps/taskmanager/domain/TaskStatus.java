@@ -56,7 +56,7 @@ public class TaskStatus implements Serializable {
         this.name = name;
     }
 
-    public Boolean getVisible() {
+    public Boolean isVisible() {
         return this.visible;
     }
 
@@ -94,7 +94,7 @@ public class TaskStatus implements Serializable {
         return "TaskStatus{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
-            ", visible='" + getVisible() + "'" +
+            ", visible='" + isVisible() + "'" +
             "}";
     }
 }

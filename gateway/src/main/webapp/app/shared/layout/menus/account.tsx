@@ -10,7 +10,7 @@ import { NavDropdown } from './menu-components';
 const accountMenuItemsAuthenticated = () => (
   <>
     <MenuItem icon="sign-out-alt" to="/logout" data-cy="logout">
-      Sign out
+      Cerrar Sesión
     </MenuItem>
   </>
 );
@@ -31,7 +31,7 @@ const accountMenuItems = () => {
           })
         }
       >
-        <FontAwesomeIcon icon="sign-in-alt" /> Sign in
+        <FontAwesomeIcon icon="sign-in-alt" /> Iniciar Sesión
       </DropdownItem>
     </>
   );

@@ -21,10 +21,8 @@ public class TaskDTO implements Serializable {
     @NotNull
     private String description;
 
-    @NotNull
     private Instant createTime;
 
-    @NotNull
     private Instant updateTime;
 
     @NotNull

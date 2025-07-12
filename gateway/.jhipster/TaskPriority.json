@@ -1,0 +1,27 @@
+{
+  "annotations": {
+    "changelogDate": "20250701223035"
+  },
+  "applications": "*",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "level",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "visible",
+      "fieldType": "Boolean",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "name": "TaskPriority",
+  "pagination": "pagination",
+  "relationships": [],
+  "service": "serviceClass"
+}

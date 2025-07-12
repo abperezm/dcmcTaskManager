@@ -32,19 +32,21 @@ public class Task implements Serializable {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @NotNull
+    
     @Column(name = "create_time", nullable = false)
     private Instant createTime;
 
-    @NotNull
+    
     @Column(name = "update_time", nullable = false)
     private Instant updateTime;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "task")
-    @JsonIgnoreProperties(value = { "task" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"task"}, allowSetters = true)
     private Set<Comment> comments = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "work_group_id", nullable = false)
+    @JsonIgnoreProperties(value = {"tasks", "members"}, allowSetters = true)
     private WorkGroup workGroup;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -56,20 +58,26 @@ public class Task implements Serializable {
     private Set<User> assignedMembers = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties(value = { "tasks", "workGroup", "members" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"tasks", "workGroup", "members"}, allowSetters = true)
     private Project project;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "priority_id", nullable = false)
+    @JsonIgnoreProperties(value = {"tasks"}, allowSetters = true)
     private TaskPriority priority;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "status_id", nullable = false)
+    @JsonIgnoreProperties(value = {"tasks"}, allowSetters = true)
     private TaskStatus status;
 
     @NotNull
     @Column(name = "archived", nullable = false)
     private Boolean archived = false;
 
-    // Getters y setters
+    // jhipster-needle-entity-add-field - JHipster will add fields here
 
     public Boolean isArchived() {
         return archived;
@@ -237,8 +245,8 @@ public class Task implements Serializable {
         this.priority = priority;
     }
 
-    public Task priority(TaskPriority updatedPriority) {
-        this.setPriority(updatedPriority);
+    public Task priority(TaskPriority priority) {
+        this.setPriority(priority);
         return this;
     }
 

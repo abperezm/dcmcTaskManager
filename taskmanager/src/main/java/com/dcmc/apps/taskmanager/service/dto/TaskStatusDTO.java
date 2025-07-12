@@ -10,6 +10,16 @@ import java.util.Objects;
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class TaskStatusDTO implements Serializable {
 
+    public TaskStatusDTO() {
+        // Default constructor
+    }
+
+    public TaskStatusDTO(Long id, String name, Boolean visible) {
+        this.id = id;
+        this.name = name;
+        this.visible = visible;
+    }
+
     private Long id;
 
     @NotNull
@@ -34,7 +44,7 @@ public class TaskStatusDTO implements Serializable {
         this.name = name;
     }
 
-    public Boolean getVisible() {
+    public Boolean isVisible() {
         return visible;
     }
 
@@ -69,7 +79,7 @@ public class TaskStatusDTO implements Serializable {
         return "TaskStatusDTO{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
-            ", visible='" + getVisible() + "'" +
+            ", visible='" + isVisible() + "'" +
             "}";
     }
 }

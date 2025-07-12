@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+       http://www.liquibase.org/xml/ns/dbchangelog
+       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- 1. Añadir columnas de FK -->
+    <changeSet id="20250704-01-add-fk-columns-to-task" author="you">
+        <addColumn tableName="task">
+            <column name="priority_id" type="bigint"/>
+            <column name="status_id"   type="bigint"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- 2. Migrar datos de los enums antiguos -->
+    <changeSet id="20250704-02-migrate-priority-status-values" author="you">
+        <!-- Para cada fila de task, set priority_id = el id de task_priority con mismo name -->
+        <update tableName="task">
+            <column name="priority_id" valueComputed="(
+                select id from task_priority tp where tp.name = task.priority
+            )"/>
+        </update>
+        <update tableName="task">
+            <column name="status_id" valueComputed="(
+                select id from task_status ts where ts.name = task.status
+            )"/>
+        </update>
+    </changeSet>
+
+    <!-- 3. Declarar Not Null en las nuevas columnas -->
+    <changeSet id="20250704-03-set-not-null-on-fk-cols" author="you">
+        <addNotNullConstraint tableName="task" columnName="priority_id" columnDataType="bigint"/>
+        <addNotNullConstraint tableName="task" columnName="status_id"   columnDataType="bigint"/>
+    </changeSet>
+
+    <!-- 4. Agregar las constrains de FK -->
+    <changeSet id="20250704-04-add-foreign-keys" author="you">
+        <addForeignKeyConstraint
+            baseTableName="task"
+            baseColumnNames="priority_id"
+            constraintName="fk_task_priority"
+            referencedTableName="task_priority"
+            referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+            baseTableName="task"
+            baseColumnNames="status_id"
+            constraintName="fk_task_status"
+            referencedTableName="task_status"
+            referencedColumnNames="id"/>
+    </changeSet>
+
+    <!-- 5. (Opcional) Eliminar las columnas antiguas -->
+    <changeSet id="20250704-05-drop-old-enum-columns" author="you">
+        <dropColumn tableName="task" columnName="priority"/>
+        <dropColumn tableName="task" columnName="status"/>
+    </changeSet>
+
+</databaseChangeLog>

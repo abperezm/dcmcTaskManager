@@ -1,6 +1,10 @@
 package com.dcmc.apps.taskmanager.repository;
 
+import com.dcmc.apps.taskmanager.domain.Task;
 import com.dcmc.apps.taskmanager.domain.TaskStatus;
+
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
@@ -9,4 +13,8 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface TaskStatusRepository extends JpaRepository<TaskStatus, Long> {}
+public interface TaskStatusRepository extends JpaRepository<TaskStatus, Long> {
+
+    Optional<TaskStatus> findByName(String name);
+
+}

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TaskRepository extends TaskRepositoryWithBagRelationships, JpaRepository<Task, Long> {
 
-    // Eager loading methods
+    // Eager loading methods, ahora incluye también priority y status
     default Optional<Task> findOneWithEagerRelationships(Long id) {
         return this.fetchBagRelationships(this.findOneWithToOneRelationships(id));
     }
@@ -32,15 +32,37 @@ public interface TaskRepository extends TaskRepositoryWithBagRelationships, JpaR
     }
 
     @Query(
-        value = "select task from Task task left join fetch task.workGroup left join fetch task.project",
+        value = """
+            select task
+            from Task task
+            left join fetch task.workGroup
+            left join fetch task.project
+            left join fetch task.priority
+            left join fetch task.status
+            """,
         countQuery = "select count(task) from Task task"
     )
     Page<Task> findAllWithToOneRelationships(Pageable pageable);
 
-    @Query("select task from Task task left join fetch task.workGroup left join fetch task.project")
+    @Query("""
+        select task
+        from Task task
+        left join fetch task.workGroup
+        left join fetch task.project
+        left join fetch task.priority
+        left join fetch task.status
+        """)
     List<Task> findAllWithToOneRelationships();
 
-    @Query("select task from Task task left join fetch task.workGroup left join fetch task.project where task.id =:id")
+    @Query("""
+        select task
+        from Task task
+        left join fetch task.workGroup
+        left join fetch task.project
+        left join fetch task.priority
+        left join fetch task.status
+        where task.id =:id
+        """)
     Optional<Task> findOneWithToOneRelationships(@Param("id") Long id);
 
     // Archivado

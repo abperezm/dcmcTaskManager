@@ -7,6 +7,7 @@ import com.dcmc.apps.taskmanager.repository.ProjectRepository;
 import com.dcmc.apps.taskmanager.security.SecurityUtils;
 import com.dcmc.apps.taskmanager.service.dto.ProjectDTO;
 import com.dcmc.apps.taskmanager.service.dto.TaskDTO;
+import com.dcmc.apps.taskmanager.service.dto.TaskSummaryDTO;
 import com.dcmc.apps.taskmanager.service.dto.UserDTO;
 import com.dcmc.apps.taskmanager.service.mapper.ProjectMapper;
 import com.dcmc.apps.taskmanager.domain.User;
@@ -278,4 +279,34 @@ public class ProjectService {
         task.setProject(null);
         taskRepository.save(task);
     }
+
+    @Transactional(readOnly = true)
+    public List<TaskSummaryDTO> getTaskSummariesForProject(Long projectId) {
+    // 1) Recuperar el proyecto o lanzar excepción si no existe
+    Project project = projectRepository.findById(projectId)
+        .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+
+    // 2) Verificar que el usuario forma parte del work group
+    Long groupId = project.getWorkGroup().getId();
+    String currentUserLogin = SecurityUtils.getCurrentUserLogin()
+        .orElseThrow(() -> new RuntimeException("User not authenticated"));
+    boolean isMember = workGroupMembershipRepository
+        .findByUserIdAndWorkGroupId(currentUserLogin, groupId)
+        .isPresent();
+    if (!isMember) {
+        throw new AccessDeniedException("User is not part of the work group");
+    }
+
+    // 3) Mapear las tareas del proyecto a TaskSummaryDTO
+    return project.getTasks().stream()
+        .map(t -> new TaskSummaryDTO(
+            t.getId(),
+            t.getTitle(),
+            t.getPriority() != null ? t.getPriority().getName() : null,
+            t.getStatus()   != null ? t.getStatus().getName()   : null,
+            t.isArchived()
+        ))
+        .collect(Collectors.toList());
+}
+
 }

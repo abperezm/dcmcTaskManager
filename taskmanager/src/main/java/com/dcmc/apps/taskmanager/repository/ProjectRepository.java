@@ -29,6 +29,8 @@ public interface ProjectRepository extends ProjectRepositoryWithBagRelationships
         return this.fetchBagRelationships(this.findAllWithToOneRelationships(pageable));
     }
 
+    List<Project> findByWorkGroupId(Long workGroupId);
+
     @Query(
         value = "select project from Project project left join fetch project.workGroup",
         countQuery = "select count(project) from Project project"

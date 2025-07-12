@@ -1,12 +1,17 @@
 package com.dcmc.apps.taskmanager.service;
 
 import com.dcmc.apps.taskmanager.domain.Task;
+import com.dcmc.apps.taskmanager.domain.TaskStatus;
 import com.dcmc.apps.taskmanager.domain.enumeration.WorkGroupRole;
 import com.dcmc.apps.taskmanager.repository.TaskRepository;
 import com.dcmc.apps.taskmanager.repository.WorkGroupMembershipRepository;
 import com.dcmc.apps.taskmanager.security.SecurityUtils;
 import com.dcmc.apps.taskmanager.service.dto.TaskDTO;
+import com.dcmc.apps.taskmanager.service.dto.TaskStatusDTO;
 import com.dcmc.apps.taskmanager.service.mapper.TaskMapper;
+import com.dcmc.apps.taskmanager.repository.TaskStatusRepository;
+
+import java.time.Instant;
 import java.util.Optional;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -28,24 +33,49 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
     private final WorkGroupMembershipRepository workGroupMembershipRepository;
+    private final TaskStatusRepository taskStatusRepository;
 
     public TaskService(
         TaskRepository taskRepository,
         TaskMapper taskMapper,
         WorkGroupMembershipRepository workGroupMembershipRepository
+        , TaskStatusRepository taskStatusRepository
     ) {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
         this.workGroupMembershipRepository = workGroupMembershipRepository;
+        this.taskStatusRepository = taskStatusRepository;
     }
 
+/**
+     * Save a task, assigning defaults if necessary.
+     */
     public TaskDTO save(TaskDTO taskDTO) {
         LOG.debug("Request to save Task : {}", taskDTO);
+        Instant now = Instant.now();
+
+        // Default status if missing
+        if (taskDTO.getStatus() == null || taskDTO.getStatus().getId() == null) {
+            TaskStatus defaultStatus = taskStatusRepository
+                .findByName("NOT_STARTED")
+                .orElseThrow(() -> new IllegalStateException("Default status NOT_STARTED not found"));
+            taskDTO.setStatus(new TaskStatusDTO(defaultStatus.getId(), defaultStatus.getName(), defaultStatus.isVisible()));
+        }
+
+        // Default timestamps if missing
+        if (taskDTO.getCreateTime() == null) {
+            taskDTO.setCreateTime(now);
+        }
+        taskDTO.setUpdateTime(now);
+
         Task task = taskMapper.toEntity(taskDTO);
         task = taskRepository.save(task);
         return taskMapper.toDto(task);
     }
 
+    /**
+     * Update a task (full replacement), preserving createTime and assigning new updateTime.
+     */
     public TaskDTO update(TaskDTO taskDTO) {
         LOG.debug("Request to update Task : {}", taskDTO);
 
@@ -56,11 +86,20 @@ public class TaskService {
             throw new IllegalStateException("Archived tasks cannot be edited");
         }
 
+        Instant now = Instant.now();
+        // Preserve original createTime
+        taskDTO.setCreateTime(existing.getCreateTime());
+        // Always refresh updateTime
+        taskDTO.setUpdateTime(now);
+
         Task task = taskMapper.toEntity(taskDTO);
         task = taskRepository.save(task);
         return taskMapper.toDto(task);
     }
 
+    /**
+     * Partially update a task, setting updateTime and forbidding edits on archived.
+     */
     public Optional<TaskDTO> partialUpdate(TaskDTO taskDTO) {
         LOG.debug("Request to partially update Task : {}", taskDTO);
 
@@ -69,7 +108,11 @@ public class TaskService {
                 throw new IllegalStateException("Archived tasks cannot be edited");
             }
 
+            // Apply only non-null fields
             taskMapper.partialUpdate(existingTask, taskDTO);
+            // Update the timestamp
+            existingTask.setUpdateTime(Instant.now());
+
             return taskRepository.save(existingTask);
         }).map(taskMapper::toDto);
     }

@@ -4,6 +4,7 @@ import java.util.Set;
 
 public class UserSyncDTO {
 
+    private String id;
     private String login;
     private String email;
     private String firstName;
@@ -12,7 +13,13 @@ public class UserSyncDTO {
     private boolean activated;
     private String langKey;
 
-    
+
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
     public String getLogin() {
         return login;
     }

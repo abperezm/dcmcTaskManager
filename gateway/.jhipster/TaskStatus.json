@@ -1,0 +1,23 @@
+{
+  "annotations": {
+    "changelogDate": "20250701223036"
+  },
+  "applications": "*",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "visible",
+      "fieldType": "Boolean",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "name": "TaskStatus",
+  "pagination": "pagination",
+  "relationships": [],
+  "service": "serviceClass"
+}

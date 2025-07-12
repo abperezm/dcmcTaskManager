@@ -4,7 +4,10 @@ import com.dcmc.apps.taskmanager.repository.WorkGroupRepository;
 import com.dcmc.apps.taskmanager.security.SecurityUtils;
 import com.dcmc.apps.taskmanager.service.WorkGroupService;
 import com.dcmc.apps.taskmanager.service.WorkGroupPermissionService;
+import com.dcmc.apps.taskmanager.service.dto.UserSummaryDTO;
+import com.dcmc.apps.taskmanager.service.dto.UserWorkGroupDTO;
 import com.dcmc.apps.taskmanager.service.dto.WorkGroupDTO;
+import com.dcmc.apps.taskmanager.service.dto.WorkGroupDetailDTO;
 import com.dcmc.apps.taskmanager.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -150,7 +154,6 @@ public class WorkGroupResource {
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
             .build();
     }
-
     @PutMapping("/{workGroupId}/transfer-ownership/{newOwnerUserId}")
     public ResponseEntity<Void> transferOwnership(
         @PathVariable Long workGroupId,
@@ -196,5 +199,40 @@ public class WorkGroupResource {
         String currentUserId = SecurityUtils.getCurrentUserLogin().orElseThrow();
         workGroupService.leaveGroup(groupId, currentUserId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * {@code POST  /api/work-groups/:id/members/:newUserId} : añade un nuevo miembro al grupo.
+     */
+    @PostMapping("/{id}/members/{newUserId}")
+    public ResponseEntity<Void> addMember(
+        @PathVariable Long id,
+        @PathVariable String newUserId
+    ) {
+        LOG.debug("REST request to add member {} to group {}", newUserId, id);
+        workGroupService.addMember(id, newUserId);
+        return ResponseEntity.noContent().build();
+    }    
+
+    /**
+     * {@code GET  /api/work-groups/my} : retorna únicamente los grupos del usuario actual.
+     *
+     * @return lista de UserWorkGroupDTO (name, description, role).
+     */
+    @GetMapping("/my")
+    public ResponseEntity<List<UserWorkGroupDTO>> getMyWorkGroups() {
+        List<UserWorkGroupDTO> list = workGroupService.findMyWorkGroups();
+        return ResponseEntity.ok().body(list);
+    }
+
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<WorkGroupDetailDTO> getDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(workGroupService.findDetail(id));
+    }
+
+// dentro de WorkGroupResource
+    @GetMapping("/{id}/potential-members")
+    public ResponseEntity<List<UserSummaryDTO>> getPotentialMembers(@PathVariable Long id) {
+        return ResponseEntity.ok(workGroupService.findPotentialMembers(id));
     }
 }

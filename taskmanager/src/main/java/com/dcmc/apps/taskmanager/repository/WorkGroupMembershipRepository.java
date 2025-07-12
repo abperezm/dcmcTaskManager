@@ -19,6 +19,10 @@ public interface WorkGroupMembershipRepository extends JpaRepository<WorkGroupMe
     )
     List<WorkGroupMembership> findByUserIsCurrentUser();
 
+    List<WorkGroupMembership> findByUserId(String userId);
+
+    List<WorkGroupMembership> findByWorkGroupId(Long workGroupId);
+
     Optional<WorkGroupMembership> findByUserIdAndWorkGroupId(String userId, Long workGroupId);
 
     default Optional<WorkGroupMembership> findOneWithEagerRelationships(Long id) {

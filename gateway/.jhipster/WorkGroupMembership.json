@@ -1,0 +1,26 @@
+{
+  "annotations": {
+    "changelogDate": "20250701223039"
+  },
+  "applications": "*",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "role",
+      "fieldType": "WorkGroupRole",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "OWNER,MODERADOR,MIEMBRO"
+    }
+  ],
+  "name": "WorkGroupMembership",
+  "relationships": [
+    {
+      "otherEntityField": "name",
+      "otherEntityName": "workGroup",
+      "relationshipName": "workGroup",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "service": "serviceClass"
+}
